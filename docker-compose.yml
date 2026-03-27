@@ -1,4 +1,27 @@
 services:
+  traefik:
+    image: traefik:v3
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=traefik-public
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.letsencrypt.acme.tlschallenge=true
+      - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - letsencrypt:/letsencrypt
+    networks:
+      - traefik-public
+    restart: unless-stopped
+
   keycloak:
     image: quay.io/keycloak/keycloak:26.0
     command: start-dev --import-realm
@@ -10,10 +33,18 @@ services:
       KC_DB_USERNAME: ${KC_DB_USERNAME:-keycloak}
       KC_DB_PASSWORD: ${KC_DB_PASSWORD:-keycloak}
       KC_HTTP_PORT: 8080
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.keycloak.rule=Host(`${KC_HOSTNAME}`)
+      - traefik.http.routers.keycloak.entrypoints=websecure
+      - traefik.http.routers.keycloak.tls.certresolver=letsencrypt
+      - traefik.http.services.keycloak.loadbalancer.server.port=8080
     ports:
       - "8180:8080"
     volumes:
       - ./realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+    networks:
+      - traefik-public
     depends_on:
       keycloak-db:
         condition: service_healthy
@@ -34,5 +65,10 @@ services:
       timeout: 5s
       retries: 5
 
+networks:
+  traefik-public:
+    name: traefik-public
+
 volumes:
+  letsencrypt:
   keycloak_pgdata:
