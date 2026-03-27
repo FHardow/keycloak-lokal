@@ -1,120 +1,65 @@
 {
-  "realm": "artisan",
+  "realm": "bread-order",
   "enabled": true,
+  "displayName": "Bread Order",
+  "sslRequired": "external",
   "registrationAllowed": false,
   "loginWithEmailAllowed": true,
   "duplicateEmailsAllowed": false,
-  "sslRequired": "none",
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "clients": [
+    {
+      "clientId": "bread-order-app",
+      "name": "Bread Order App",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "http://localhost:5173/*",
+        "https://server:*/*"
+      ],
+      "webOrigins": [
+        "http://localhost:5173",
+        "https://server:*"
+      ],
+      "protocol": "openid-connect",
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    }
+  ],
   "roles": {
     "realm": [
       {
         "name": "user",
-        "description": "Default user role",
-        "composite": false
+        "description": "Regular application user"
       },
       {
         "name": "admin",
-        "description": "Administrator role",
-        "composite": false
+        "description": "Application administrator"
       }
     ]
   },
   "defaultRoles": ["user"],
-  "clients": [
-    {
-      "clientId": "artisan-backend",
-      "enabled": true,
-      "protocol": "openid-connect",
-      "publicClient": false,
-      "secret": "artisan-backend-secret",
-      "bearerOnly": false,
-      "standardFlowEnabled": false,
-      "directAccessGrantsEnabled": true,
-      "serviceAccountsEnabled": true,
-      "authorizationServicesEnabled": false,
-      "redirectUris": [],
-      "webOrigins": [],
-      "defaultClientScopes": ["openid", "email", "profile", "roles"],
-      "protocolMappers": [
-        {
-          "name": "audience-mapper",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-audience-mapper",
-          "config": {
-            "included.client.audience": "artisan-backend",
-            "id.token.claim": "false",
-            "access.token.claim": "true",
-            "included.custom.audience": "",
-            "userinfo.token.claim": "false"
-          }
-        }
-      ]
-    },
-    {
-      "clientId": "artisan-frontend",
-      "enabled": true,
-      "protocol": "openid-connect",
-      "publicClient": true,
-      "bearerOnly": false,
-      "standardFlowEnabled": true,
-      "directAccessGrantsEnabled": true,
-      "serviceAccountsEnabled": false,
-      "redirectUris": ["http://localhost:3000/*"],
-      "webOrigins": ["http://localhost:3000"],
-      "defaultClientScopes": ["openid", "email", "profile", "roles"],
-      "protocolMappers": [
-        {
-          "name": "audience-mapper",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-audience-mapper",
-          "config": {
-            "included.client.audience": "artisan-backend",
-            "id.token.claim": "false",
-            "access.token.claim": "true",
-            "included.custom.audience": "",
-            "userinfo.token.claim": "false"
-          }
-        }
-      ]
-    }
-  ],
-  "clientScopes": [
-    {
-      "name": "roles",
-      "description": "Realm roles in the token",
-      "protocol": "openid-connect",
-      "protocolMappers": [
-        {
-          "name": "realm-roles",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-realm-role-mapper",
-          "config": {
-            "claim.name": "realm_access.roles",
-            "multivalued": "true",
-            "id.token.claim": "true",
-            "access.token.claim": "true",
-            "userinfo.token.claim": "true"
-          }
-        }
-      ]
-    }
-  ],
   "users": [
     {
-      "username": "test@example.com",
-      "email": "test@example.com",
-      "emailVerified": true,
-      "enabled": true,
-      "firstName": "Test",
+      "username": "admin",
+      "email": "admin@bread-order.local",
+      "firstName": "Admin",
       "lastName": "User",
-      "realmRoles": ["user"],
+      "enabled": true,
+      "emailVerified": true,
       "credentials": [
         {
           "type": "password",
-          "value": "test1234",
+          "value": "admin",
           "temporary": false
         }
-      ]
+      ],
+      "realmRoles": ["user", "admin"]
     }
   ]
 }
